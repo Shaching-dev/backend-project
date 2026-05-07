@@ -1,5 +1,5 @@
-import e from "express";
-const app = e();
+import express from "express";
+const app = express();
 import cookieParser from "cookie-parser";
 import cors from "cors";
 // middleware----
@@ -10,12 +10,21 @@ app.use(
   })
 );
 app.use(
-  e.json({
+  express.json({
     limit: "16kb",
   })
 );
-app.use(e.urlencoded({ extended: true, limit: "16kb" }));
-app.use(e.static("public"));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.static("public"));
 app.use(cookieParser());
+
+// route import
+
+import userRouter from "./routes/user.route.js";
+
+// routes declaration
+
+app.use("/api/v2/users", userRouter);
+app.use("/api/v1/auth", userRouter);
 
 export { app };
