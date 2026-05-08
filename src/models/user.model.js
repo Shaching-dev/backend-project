@@ -31,7 +31,6 @@ const userSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
-      required: true,
     },
     watchHistory: [
       {
@@ -50,15 +49,12 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next(); // So this line protects against double hashing
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {}
+userSchema.pre("save", async function () {
+  // Only hash password if it was modified
+  if (!this.isModified("password")) return;
 
-  next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
