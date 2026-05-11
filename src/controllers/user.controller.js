@@ -22,7 +22,17 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "email and username already exist");
   }
   const avatarLocal = req.files?.avatar[0]?.path;
-  const coverImageLocal = req.files?.coverImage[0]?.path;
+  let coverImageLocal;
+
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.lenght > 0
+  ) {
+    coverImageLocal = req.files.coverImage[0].path;
+  }
+
+  // console.log(req.files);
 
   if (!avatarLocal) {
     throw new ApiError(400, "Avatar files is required");
