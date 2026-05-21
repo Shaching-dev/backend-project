@@ -68,20 +68,22 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar is required");
   }
 
-  const user = {
+  const user = await User.create({
     fullName,
     email,
     password,
     userName: userName.toLowerCase(),
     avatar: avatar?.url,
     coverImage: coverImage?.url || "",
-  };
+  });
 
-  console.log(user);
+  console.log("user log ", user);
 
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
+
+  console.log("created user ", createdUser);
 
   if (!createdUser) {
     throw new ApiError(
