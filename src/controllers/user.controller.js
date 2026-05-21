@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "user already exist");
   }
 
-  const avatarLocalPath = req.files?.avatar[0].path;
+  const avatarLocalPath = req?.files?.avatar[0]?.path;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "avatar is required");
@@ -60,6 +60,8 @@ const registerUser = asyncHandler(async (req, res) => {
   ) {
     coverImageLocalPath = req.files?.coverImage[0].path;
   }
+
+  console.log(avatarLocalPath, coverImageLocalPath);
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
@@ -100,19 +102,21 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { userName, email, password } = req.body;
 
-  if (!userName || !email) {
+  console.log(email, password);
+
+  if (!userName && !email) {
     throw new ApiError(400, "username or email is required");
   }
 
-  const user = User.findOne({
+  const user = await User.findOne({
     $or: [{ userName }, { email }],
   });
 
   if (!user) {
-    throw new ApiError(404, "user not found");
+    throw new ApiError(404, "user does not found");
   }
 
-  const validatePassword = user.isPasswordCorrect(password);
+  const validatePassword = await user.isPasswordCorrect(password);
 
   if (!validatePassword) {
     throw new ApiError(400, "invalid user credentials");
