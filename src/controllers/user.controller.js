@@ -1,4 +1,4 @@
-import asyncHandler from "../utils/asyncHandler.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -77,6 +77,8 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImage: coverImage?.url || "",
   };
 
+  console.log(user);
+
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -147,6 +149,29 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logOutUser = asyncHandler(async (req, res) => {
   // first i need to find the user id who want to log out then update refresh token undefined
+
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        accessToken: undefined,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refresToken", options)
+    .json(new ApiResponse(200, {}, "user logged out successfully"));
 });
 
-export { registerUser, loginUser };
+export { registerUser, loginUser, logOutUser };
